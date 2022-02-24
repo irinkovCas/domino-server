@@ -1,9 +1,5 @@
-type Tile = {
-    firstPip: number,
-    secondPip: number,
-};
-
-type Hand = Tile[]
+import Hand from './Hand';
+import Tile from './Tile';
 
 class DominoSet {
     tiles: Tile[] = [];
@@ -28,7 +24,7 @@ class DominoSet {
             throw new Error('Not enough tiles to deal');
         }
 
-        let hands = [];
+        let hands: Hand[] = [];
         for(let i = 0; i < numberOfHands; i++) {
             hands.push(this.tiles.splice(0, handSize));
         }
@@ -37,10 +33,4 @@ class DominoSet {
     }
 }
 
-class Game {
-    hand: Hand[];
-    line: Tile[];
-    dominoSet: DominoSet;
-}
-
-export {Game};
+export default DominoSet;

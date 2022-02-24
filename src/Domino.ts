@@ -1,14 +1,20 @@
-import { Game } from "./Game";
-import { SocketCommunication } from "./SocketCommunication";
+import { Game } from "./Game/Game";
+import { GameRoom } from "./Sockets";
 
 class Domino {
     
     game: Game;
-    socket: SocketCommunication;
+    room: GameRoom;
+    endCallback: () => void;
 
-    constructor(socket: SocketCommunication) {
-        this.socket = socket;
+    constructor(room: GameRoom, players: string[], onEnd: () => void) {
+        this.room = room;
         this.game = new Game();
+        this.endCallback = onEnd;
+    }
+
+    start() {
+        this.room.sendAll("start", {data: "The game has started"});
     }
 }
 
