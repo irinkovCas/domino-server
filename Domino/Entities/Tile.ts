@@ -3,4 +3,4 @@ type Tile = {
     secondPip: number,
 };
 
-export default Tile;
+export { Tile };

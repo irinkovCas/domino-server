@@ -1,4 +1,4 @@
-import { SocketManager } from "./Sockets";
+import { SocketManager } from "./CommunicationLayer/SocketManager";
 
 const PORT = process.env.PORT || 4567;
 

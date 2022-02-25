@@ -1,5 +1,4 @@
-import Hand from './Hand';
-import Tile from './Tile';
+import { Tile } from './Tile';
 
 class DominoSet {
     tiles: Tile[] = [];
@@ -19,18 +18,13 @@ class DominoSet {
         }
     }
 
-    deal(numberOfHands: number, handSize) : Hand[] {
-        if (numberOfHands * handSize > this.tiles.length) {
-            throw new Error('Not enough tiles to deal');
-        }
+    draw() : Tile | undefined {
+        return this.tiles.pop();
+    }
 
-        let hands: Hand[] = [];
-        for(let i = 0; i < numberOfHands; i++) {
-            hands.push(this.tiles.splice(0, handSize));
-        }
-
-        return hands;
+    drawN(n: number) : Tile[] {
+        return this.tiles.splice(0, n);
     }
 }
 
-export default DominoSet;
+export { DominoSet };

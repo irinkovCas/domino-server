@@ -1,52 +1,9 @@
 import * as http from 'http'
 import express, { Express } from 'express';
 const socketIO = require('socket.io'); // not using import because this is an old version
-import { Domino } from './Domino';
-import { Game } from './Game/Game';
-
-type jsonType = {[key: string]: any};
-type Player = string; // its the same as socket.id
-
-class GameRoom {
-
-    private name: string;
-    
-    private io: any;
-    private readonly clients: Map<Player, any>;
-
-    private onCloseCallback: () => void;
-
-    constructor(name: string, io: any, clients: Map<Player, any>, onClose: () => void) {
-        this.name = name;
-        this.io = io;
-        this.clients = clients;
-        this.onCloseCallback = onClose;
-
-        for (let socket of this.clients.values()) {
-            socket.join(this.name);
-        }
-    }
-
-    public send(player: string, event: string, data: jsonType) {
-        this.clients.get(player).emit(event, data);
-    }
-
-    public sendAll(event: string, data: jsonType) {
-        this.io.in(this.name).emit(event, data);
-    }
-
-    public sendAllBut(player: string, event: string, data: jsonType) {
-        this.clients.get(player).to(this.name).emit(event, data);
-    }
-
-    public close() {
-        for (let socket of this.clients.values()) {
-            socket.leave(this.name)
-        }
-
-        this.onCloseCallback();
-    }
-}
+import { Domino } from '../Domino/Domino';
+import { GameRoom } from './GameRoom';
+import { Player } from './Player';
 
 class SocketManager {
     
@@ -55,9 +12,9 @@ class SocketManager {
     private io: any; // There are no types ;(
 
     private clients: Map<Player, any> = new Map(); // map socket.id -> socket
-    private rooms: Map<string, GameRoom> = new Map();
+    private dominoes:Domino[] = [];
 
-    private readonly waitingToStart = new Set<Player>();
+    private waitingToStart = new Set<Player>();
     private readonly playersToStartAGame = 2;
 
     constructor() {
@@ -80,8 +37,11 @@ class SocketManager {
             
             console.log('Client connected');
 
-            this.clients.set(socket.id, socket);
-            this.queuePlayer(socket.id);
+            // name is the same as socket.id for now
+            const player: Player = { id: socket.id, name: socket.id };
+
+            this.clients.set(player , socket);
+            this.queuePlayer(player);
             
             socket.emit('message', {data: 'Welcome to the game'});
             socket.emit('your_id', {id: socket.id});
@@ -95,7 +55,7 @@ class SocketManager {
         });
     }
 
-    private queuePlayer(player: string) { 
+    private queuePlayer(player: Player) { 
         this.waitingToStart.add(player);
             
         if (this.waitingToStart.size === this.playersToStartAGame) {
@@ -109,14 +69,13 @@ class SocketManager {
         }
     }
 
-    private createGame(players: string[]) {
+    private createGame(players: Player[]) {
         let roomClients = new Map();
         for (let player of players) {
-            roomClients.set(player, this.clients.get(player));
+            roomClients.set(player.name, this.clients.get(player));
         }
         
-        
-        const roomName = `${players[0]} vs ${players[1]}`;
+        const roomName = `${players[0].name} vs ${players[1].name}`;
         const gameRoom = new GameRoom(
             roomName, 
             this.io, 
@@ -125,14 +84,14 @@ class SocketManager {
                 console.log('Game closed');
             }
         );
-        this.rooms[roomName] = gameRoom;
-        const domino = new Domino(gameRoom, players, () => gameRoom.close()); // runs the game
-        domino.start();
+        const domino = new Domino(gameRoom, () => console.log('Domino closed'));
+        this.dominoes.push(domino);
+        domino.start(); // runs the game
     }
 
     close() {
-        for (const room of this.rooms.values()) {
-            room.close();
+        for (const domino of this.dominoes) {
+            domino.close();
         }
         this.io.close()
         this.server.close();
