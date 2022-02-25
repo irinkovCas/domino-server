@@ -1,3 +1,4 @@
+import { Direction, Move } from "./Move";
 import { Tile } from "./Tile";
 
 class Player {
@@ -11,13 +12,14 @@ class Player {
     }
 
     validMoves(leftPip: number, rightPip: number) {
-        let validMoves: Tile[] = [];
+        this.tiles.map(tile => [tile.firstPip, tile.secondPip])
+        let validMoves: Move[] = [];
         for (let tile of this.tiles) {
             if (tile.firstPip === leftPip || tile.secondPip === leftPip) {
-                validMoves.push(tile);
+                validMoves.push({where: Direction.Left, tile});
             }
             if (tile.firstPip === rightPip || tile.secondPip === rightPip) {
-                validMoves.push(tile);
+                validMoves.push({where: Direction.Right, tile});
             }
         }
         return validMoves;

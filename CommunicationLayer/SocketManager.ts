@@ -28,7 +28,6 @@ class SocketManager {
     } 
 
     listen(port: number | string) {
-        console.log("Hello");
         this.server.listen(port, () => {
             console.log(`Server running on http://localhost:${port}...`);
         });
@@ -76,14 +75,7 @@ class SocketManager {
         }
         
         const roomName = `${players[0].name} vs ${players[1].name}`;
-        const gameRoom = new GameRoom(
-            roomName, 
-            this.io, 
-            roomClients,
-            () => { 
-                console.log('Game closed');
-            }
-        );
+        const gameRoom = new GameRoom( roomName, this.io, roomClients);
         const domino = new Domino(gameRoom, () => console.log('Domino closed'));
         this.dominoes.push(domino);
         domino.start(); // runs the game

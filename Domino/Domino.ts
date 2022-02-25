@@ -1,13 +1,13 @@
 import { Game } from "./Game";
-import { IState } from "./States/IState";
+import { State } from "./States/State";
 import { GameRoom } from "../CommunicationLayer/SocketManager";
 import { Player } from "./Entities/Player";
 class Domino {
     
-    game: Game;
-    state: IState;
+    private game: Game;
+    private state: State;
     
-    room: GameRoom;
+    private room: GameRoom;
 
     endCallback: () => void;
 
@@ -21,8 +21,10 @@ class Domino {
         this.room.sendAll("start", {data: "The game has started"});  
     }
 
-    setState(state: any) { 
-
+    transition(next: State) { 
+        this.state.end();
+        this.state = next;
+        this.state.start();
     }
 
     close () { 

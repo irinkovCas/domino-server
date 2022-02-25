@@ -1,8 +1,8 @@
 import { Game } from "../Game";
 import { State } from "./State";
 
-class StartRound extends State {
-
+class EndRoundController extends State {
+    
     constructor(game: Game, transition: (state: State) => void) {
         super(game, transition);
     }
@@ -12,7 +12,7 @@ class StartRound extends State {
     }
 
     start() {
-        console.log("StartRound - start");
+        console.log("EndRoundController - start");
     }
-
+    
 }

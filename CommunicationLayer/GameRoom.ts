@@ -8,13 +8,10 @@ class GameRoom {
     private io: any;
     private readonly clients: Map<string, any>; // map  playerName -> socket
 
-    private onCloseCallback: () => void;
-
-    constructor(name: string, io: any, clients: Map<string, any>, onClose: () => void) {
+    constructor(name: string, io: any, clients: Map<string, any>) {
         this.name = name;
         this.io = io;
         this.clients = clients;
-        this.onCloseCallback = onClose;
 
         for (let socket of this.clients.values()) {
             socket.join(this.name);
@@ -37,8 +34,6 @@ class GameRoom {
         for (let socket of this.clients.values()) {
             socket.leave(this.name)
         }
-
-        this.onCloseCallback();
     }
 
     public players(): string[] {

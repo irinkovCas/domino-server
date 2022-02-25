@@ -2,16 +2,8 @@ import { Tile } from './Entities/Tile';
 import { DominoSet } from './Entities/DominoSet';
 import { Line } from './Entities/Line';
 import { Player } from './Entities/Player';
-
-enum Direction {
-    Left,
-    Right
-}
-
-type Move = {
-    where: Direction
-    tile: Tile;
-}
+import { Direction, Move } from './Entities/Move';
+import { State } from './States/State';
 
 class Game {
     
@@ -41,10 +33,12 @@ class Game {
         } else {
             this.line.addRight(move.tile);
         }
-    }
 
-    validMoves() {
-        
+        if (move.where == Direction.Left) {
+            this.line.addLeft(move.tile);
+        } else {
+            this.line.addRight(move.tile);
+        }
     }
 }
 
