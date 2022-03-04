@@ -3,4 +3,4 @@ type Player = {
     id: string;
 }
 
-export { Player }
+export { Player };

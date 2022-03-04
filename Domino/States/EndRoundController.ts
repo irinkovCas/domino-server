@@ -1,18 +1,21 @@
-import { Game } from "../Game";
-import { State } from "./State";
+import { Domino } from '../Domino';
+import { IStateController } from './IStateController';
 
-class EndRoundController extends State {
-    
-    constructor(game: Game, transition: (state: State) => void) {
-        super(game, transition);
+class EndRoundController implements IStateController {
+    private domino: Domino;
+
+    public constructor(domino: Domino) {
+        this.domino = domino;
     }
 
-    end() {
-        throw new Error("Method not implemented.");
+    public start(): void {
+        console.log('EndRoundController - start');
     }
 
-    start() {
-        console.log("EndRoundController - start");
+    public destroy(): void {
+        throw new Error('Method not implemented.');
     }
-    
 }
+
+export { EndRoundController };
+

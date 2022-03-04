@@ -1,18 +1,22 @@
-import { Game } from "../Game";
-import { State } from "./State";
+import { Domino } from '../Domino';
+import { GameEvent } from '../Events';
+import { IStateController, State } from './IStateController';
 
-class StartRound extends State {
+class StartRoundController implements IStateController {
+    private domino: Domino;
 
-    constructor(game: Game, transition: (state: State) => void) {
-        super(game, transition);
+    public constructor(domino: Domino) {
+        this.domino = domino;
     }
 
-    end() {
-        throw new Error("Method not implemented.");
+    public start(): void {
+        this.domino.room.sendAll(GameEvent.START, { players: this.domino.game.players.map((p) => p.name) });
+        this.domino.transition(State.Deal);
     }
 
-    start() {
-        console.log("StartRound - start");
+    public destroy(): void {
+        // throw new Error("Method not implemented.");
     }
-
 }
+
+export { StartRoundController };
