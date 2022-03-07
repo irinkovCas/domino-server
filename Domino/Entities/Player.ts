@@ -1,9 +1,11 @@
-import { Direction, Move } from './Move';
-import { Tile } from './Tile';
+import equal from 'fast-deep-equal';
+import { Move } from './Move';
+import { rotate, Tile, validMovesForTile } from './Tile';
 
 class Player {
     public readonly name: string;
     public readonly tiles: Tile[];
+    public wasBlocked: boolean = false;
 
     public constructor(name: string, tiles: Tile[]) {
         this.name = name;
@@ -14,24 +16,21 @@ class Player {
         return this.tiles.length === 0;
     }
 
-    public validMoves(endingPips?: Tile): Move[] {
+    public validMoves(left?: Tile, right?: Tile): Move[] {
         const validMoves: Move[] = [];
         for (const tile of this.tiles) {
-            for (const direction of [Direction.Left, Direction.Right]) {
-                const move = new Move(direction, tile, endingPips);
-                if (move.isValid()) {
-                    validMoves.push(move);
-                }
-            }
+            validMoves.push(...validMovesForTile(tile, left, right));
         }
         return validMoves;
     }
 
-    public someValidMoves(endingPips?: Tile): boolean {
-        return this.tiles
-            .some((tile) =>
-                tile.isMatchingPip(endingPips?.firstPip) || tile.isMatchingPip(endingPips?.secondPip),
-            );
+    removeTile(tile: Tile): void { 
+        const index = this.tiles.findIndex((other) => equal(other, tile) || equal(other, rotate(tile)));
+        this.tiles.splice(index, 1);
+    }
+
+    public isStuck(left?: Tile, right?: Tile): boolean {
+        return this.validMoves(left, right).length === 0;
     }
 }
 

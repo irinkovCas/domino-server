@@ -6,7 +6,7 @@ class DominoSet {
     public constructor() {
         for (let i = 0; i <= 6; i++) {
             for (let j = i; j <= 6; j++) {
-                this.tiles.push(new Tile(i, j));
+                this.tiles.push({ firstPip: i, secondPip: j });
             }
         }
     }

@@ -1,20 +1,44 @@
-class Tile {
-    public readonly firstPip: number;
-    public readonly secondPip: number;
+import { Direction, isValid, Move } from './Move';
 
-    public constructor(firstPip: number, secondPip: number) {
-        this.firstPip = firstPip;
-        this.secondPip = secondPip;
-    }
-
-    public isMathchingTile(a: Tile): boolean {
-        return this.isMatchingPip(a.firstPip) || this.isMatchingPip(a.secondPip);
-    }
-
-    public isMatchingPip(a?: number): boolean {
-        return a == undefined || this.firstPip === a || this.secondPip === a;
-    }
+type Tile = {
+    firstPip: number,
+    secondPip: number,
 }
 
+function isMatching(a: Tile, b: Tile): boolean {
+    return a.secondPip === b.firstPip;
+}
 
-export { Tile };
+function rotate(tile: Tile): Tile {
+    return {
+        firstPip: tile.secondPip,
+        secondPip: tile.firstPip,
+    };
+}
+
+function validMovesForTile(tile: Tile, left?: Tile, right?: Tile): Move[] {
+    const validMoves: Move[] = [];
+
+    for (const t of [tile, rotate(tile)]) {
+        for (const where of [Direction.Left, Direction.Right]) {
+            const move: Move = { where, tile: t, matching: undefined };
+
+            switch (where) {
+                case Direction.Left:
+                    move.matching = left;
+                    break;
+                case Direction.Right:
+                    move.matching = right;
+                    break;
+            }
+
+            if (isValid(move)) {
+                validMoves.push(move);
+            }
+        }
+    }
+
+    return validMoves;
+}
+
+export { Tile, isMatching, rotate, validMovesForTile };

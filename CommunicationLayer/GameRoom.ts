@@ -58,7 +58,8 @@ class GameRoom {
         event: string,
         data: Record<string, unknown>,
     ): void {
-        console.log(`send ${playerName} ${event} ${JSON.stringify(data, null, 4)}`);
+        // console.log(`send ${playerName} ${event} ${JSON.stringify(data, null, 4)}`);
+        console.log(`send ${playerName} ${event} ${JSON.stringify(data)}`);
         this.clients.get(playerName)!.emit(event, data);
     }
 

@@ -1,14 +1,27 @@
+import { assert } from 'console';
 import { DominoSet } from './Entities/DominoSet';
 import { Line } from './Entities/Line';
 import { Direction, Move } from './Entities/Move';
 import { Player } from './Entities/Player';
+import { isMatching, Tile } from './Entities/Tile';
+import { State } from './States/IStateController';
 
 class Game {
+    
+    /**
+     * Only if the players are blocked consecutively
+     */
+    areAllPlayersBlocked(): boolean {
+        return this.blockedPlayerCount === this.players.length;
+    }
+
+    public blockedPlayerCount: number = 0 ;
+
     private readonly startingHandSize = 7;
 
     /* private */ public readonly players: Player[];
     private currentPlayerIndex: number;
-    /* private */ public readonly line: Line;
+    /* private */ readonly line: Line;
     /* private */ public readonly dominoSet: DominoSet;
 
     public constructor(playerNames: string[]) {
@@ -27,73 +40,88 @@ class Game {
     }
 
     public isGameOver(): boolean {
-        const tile = this.line.getLeftRightPips();
+        assert(
+            !this.line.isEmpty(),
+            `Line should not be empty before before checking for game over.
+            There should be atlest 1 tile on the line`,
+        );
+        const left = this.line.getLeft()!;
+        const right = this.line.getRight()!;
 
         const anyoneEmpty = this.players.some((player: Player) => player.isEmpty());
-        const allBlocked = this.players.every((player) => !player.someValidMoves(tile));
+        const allStuck = this.players.every((player) => player.isStuck(left, right));
 
-        return anyoneEmpty || (allBlocked && this.dominoSet.isEmpty());
+        return anyoneEmpty || (allStuck && this.dominoSet.isEmpty());
     }
 
-    public currentPlayer(): Player {
+    public getCurrentPlayer(): Player {
         return this.players[this.currentPlayerIndex];
     }
 
     public applyMove(move: Move): void {
+        this.getCurrentPlayer().removeTile(move.tile);
+
         if (move.where === Direction.Left) {
             this.line.addLeft(move.tile);
         } else {
             this.line.addRight(move.tile);
         }
-
-        if (move.where == Direction.Left) {
-            this.line.addLeft(move.tile);
-        } else {
-            this.line.addRight(move.tile);
-        }
     }
-
-    // public isValid(move: Move): boolean {
-    //     const left = this.line.getLeft()?.firstPip;
-    //     const right = this.line.getRight()?.secondPip;
-    //     return Move.prototype.isValid.call(move, left, right);
-    // }
 
     public currentPlayerValidMoves(): Move[] {
-        return this.currentPlayer().validMoves(this.line.getLeftRightPips());
+        return this.getCurrentPlayer().validMoves(this.line.getLeft(), this.line.getRight());
     }
 
-    // return blocked player if any
-    public nextPlayer(): Player[] {
-        const endingPips = this.line.getLeftRightPips();
+    /**
+     * Moves current player to the next player
+     */
+    public nextPlayer(): void {
+        this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.length;
+    }
 
-        const blocked = [];
+    /**
+     * Move current player to the next player who is not blocked
+     * @returns players names who are blocked if all are blocked return undefined
+     */
+    public nextPlayerWhoIsNotBlocked(): string[] { 
+        const left = this.line.getLeft();
+        const right = this.line.getRight();        
 
-        do {
-            this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.length;
+        const blocked: string[] = [];
 
-            // check if is blocked
-        } while (!this.currentPlayer().someValidMoves(endingPips) && this.dominoSet.isEmpty());
+        for (let i = 0; i < this.players.length; i++) {
+            this.nextPlayer();
+            const isBlocked = this.getCurrentPlayer().isStuck(left, right) && this.dominoSet.isEmpty();
+            if (!isBlocked) {
+                break;
+            }
+            blocked.push(this.getCurrentPlayer().name);
+        }
+
         return blocked;
     }
 
-    public drawTiles(): void {
-        const tile = this.dominoSet.draw()!;
-        // this.tilesDrawn.push(tile);
-
+    /**
+     * Draws a tile from the domino set until the tile is playable or the domino set is empty
+     * @returns the drawn tiles
+     */
+    public drawUntilPlayable(): Tile[] {
         // There should always be a tile on the line before needing to draw
-        const endingPips = this.line.getLeftRightPips()!;
+        const left = this.line.getLeft()!;
+        const right = this.line.getLeft()!;
 
-        const validMoves = [
-            new Move(Direction.Left, tile, endingPips),
-            new Move(Direction.Right, tile, endingPips),
-        ].some((m) => m.isValid());
+        const tilesDrawn: Tile[] = [];
 
-        if (!validMoves && this.dominoSet.isEmpty()) {
-            this.drawTiles();
+        while (!this.dominoSet.isEmpty()) {
+            const tile = this.dominoSet.draw()!;
+            tilesDrawn.push(tile);
+
+            if (isMatching(tile, left) || isMatching(tile, right)) {
+                break;
+            }
         }
 
-        // this.someValidMove = validMoves;
+        return tilesDrawn;
     }
 }
 

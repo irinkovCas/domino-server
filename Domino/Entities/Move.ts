@@ -1,29 +1,27 @@
-import { Tile } from './Tile';
+import { isMatching, Tile } from './Tile';
 
 enum Direction {
     Left = 0,
     Right = 1
 }
 
-class Move {
-    public readonly where: Direction;
-    public readonly tile: Tile;
-    public readonly matching: Tile | undefined; // there is a corner case on the first move when the line is empty
+type Move = {
+    where: Direction;
+    tile: Tile;
+    matching: Tile | undefined; // there is a corner case on the first move when the line is empty
+}
 
-    public constructor(where: Direction, tile: Tile, matching?: Tile) {
-        this.where = where;
-        this.tile = tile;
-        this.matching = matching;
+function isValid(move: Move): boolean {
+    if (move.matching === undefined) {
+        return true;
     }
 
-    public isValid(): boolean {
-        switch (this.where) {
-            case Direction.Left:
-                return this.tile.isMatchingPip(this.matching?.firstPip);
-            case Direction.Right:
-                return this.tile.isMatchingPip(this.matching?.secondPip);
-        }
+    switch (move.where) {
+        case Direction.Left:
+            return isMatching(move.tile, move.matching);
+        case Direction.Right:
+            return isMatching(move.matching, move.tile);
     }
 }
 
-export { Move, Direction };
+export { Move, Direction, isValid };
