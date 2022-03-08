@@ -4,7 +4,7 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "lint": "eslint \"./Domino/**\" \"./CommunicationLayer/**\" \"./index.ts\" --ext .ts --fix",
+        "lint": "eslint \"./Domino/**\" --ext .ts --fix",
         "test": "npx mocha ./build/test --watch --timeout 5000",
         "build": "npx tsc",
         "dev": "nodemon index.ts --watch"

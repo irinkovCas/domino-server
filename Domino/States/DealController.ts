@@ -1,5 +1,5 @@
 import { Domino } from '../Domino';
-import { GameEvent } from '../Events';
+import { Event } from '../Events';
 import { IStateController, State } from './IStateController';
 
 class DealController implements IStateController {
@@ -15,7 +15,7 @@ class DealController implements IStateController {
         this.domino.game.deal();
 
         this.domino.game.players.forEach((player) => {
-            this.domino.room.send(player.name, GameEvent.DEAL, { tiles: player.tiles });
+            this.domino.room.send(player.name, Event.Deal, { tiles: player.tiles });
         });
 
         setTimeout(

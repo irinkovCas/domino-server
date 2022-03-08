@@ -25,6 +25,12 @@ class Line {
         return this.tiles[this.tiles.length - 1];
     }
 
+    public getEndingPips(): Tile | undefined {
+        const left = this.getLeft();
+        const right = this.getRight();
+        return (left && right) ? { firstPip: left.firstPip, secondPip: right.secondPip } : undefined;
+    }
+
     public isEmpty(): boolean {
         return this.tiles.length === 0;
     }

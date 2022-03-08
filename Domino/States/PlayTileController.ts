@@ -2,7 +2,7 @@ import equal from 'fast-deep-equal';
 import { Domino } from '../Domino';
 import { Move } from '../Entities/Move';
 import { Player } from '../Entities/Player';
-import { GameEvent } from '../Events';
+import { Event } from '../Events';
 import { IStateController, State } from './IStateController';
 
 class PlayTileController implements IStateController {
@@ -27,11 +27,11 @@ class PlayTileController implements IStateController {
         this.validMoves = this.domino.game.currentPlayerValidMoves();
 
         if (this.validMoves.length === 0 && !this.domino.game.dominoSet.isEmpty()) {
-            this.domino.room.sendAll(GameEvent.Stuck, { player: name });
+            this.domino.room.sendAll(Event.Stuck, { player: name });
             this.domino.transition(State.DrawTile);
         } else if (this.validMoves.length === 0 && this.domino.game.dominoSet.isEmpty()) {
             this.domino.game.blockedPlayerCount += 1;
-            this.domino.room.sendAll(GameEvent.PLAYER_BLOCKED_NOTIFICATION, { player: name });
+            this.domino.room.sendAll(Event.Blocked, { player: name });
 
             if (this.domino.game.areAllPlayersBlocked()) {
                 this.domino.transition(State.EndRound);
@@ -42,8 +42,8 @@ class PlayTileController implements IStateController {
         } else if (this.validMoves.length > 1) {
             this.domino.game.blockedPlayerCount = 0;
 
-            this.domino.room.send(name, GameEvent.TILE_PLAY_REQUEST, { player: name, moves: this.validMoves });
-            this.domino.room.sendAllBut(name, GameEvent.TILE_PLAY_REQUEST, { player: name });
+            this.domino.room.send(name, Event.TilePlayRequest, { player: name, moves: this.validMoves });
+            this.domino.room.sendAllBut(name, Event.TilePlayRequest, { player: name });
 
             this.onGameMessageListener = this.onGameMessage.bind(this);
             this.domino.room.listenToPlayerOnce(name, 'play_move', this.onGameMessageListener);
@@ -78,7 +78,7 @@ class PlayTileController implements IStateController {
     private playMove(move: Move): void {
         // There is a chance that the player played a move but the time ran out on the server and he must be notified that the move he played didn't count
         // this case must be handled in the client!
-        this.domino.room.sendAll(GameEvent.TILE_PLAY_NOTIFICATION, { player: this.player.name, move });
+        this.domino.room.sendAll(Event.TilePlayNotification, { player: this.player.name, move });
         this.domino.game.applyMove(move);
 
         if (this.player.isEmpty()) {

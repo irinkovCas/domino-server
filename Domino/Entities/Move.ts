@@ -6,21 +6,20 @@ enum Direction {
 }
 
 type Move = {
-    where: Direction;
     tile: Tile;
-    matching: Tile | undefined; // there is a corner case on the first move when the line is empty
+    where: Direction;
 }
 
-function isValid(move: Move): boolean {
-    if (move.matching === undefined) {
+function isValid(move: Move, endingPips?: Tile): boolean {
+    if (endingPips === undefined) {
         return true;
     }
 
     switch (move.where) {
         case Direction.Left:
-            return isMatching(move.tile, move.matching);
+            return isMatching(move.tile, endingPips);
         case Direction.Right:
-            return isMatching(move.matching, move.tile);
+            return isMatching(endingPips, move.tile);
     }
 }
 

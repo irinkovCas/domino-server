@@ -3,25 +3,23 @@ import { DominoSet } from './Entities/DominoSet';
 import { Line } from './Entities/Line';
 import { Direction, Move } from './Entities/Move';
 import { Player } from './Entities/Player';
-import { isMatching, Tile } from './Entities/Tile';
-import { State } from './States/IStateController';
+import { Tile, validMovesForTile } from './Entities/Tile';
 
 class Game {
-    
     /**
      * Only if the players are blocked consecutively
      */
-    areAllPlayersBlocked(): boolean {
+    public areAllPlayersBlocked(): boolean {
         return this.blockedPlayerCount === this.players.length;
     }
 
-    public blockedPlayerCount: number = 0 ;
+    public blockedPlayerCount = 0;
 
     private readonly startingHandSize = 7;
 
     /* private */ public readonly players: Player[];
     private currentPlayerIndex: number;
-    /* private */ readonly line: Line;
+    /* private */ public readonly line: Line;
     /* private */ public readonly dominoSet: DominoSet;
 
     public constructor(playerNames: string[]) {
@@ -45,11 +43,10 @@ class Game {
             `Line should not be empty before before checking for game over.
             There should be atlest 1 tile on the line`,
         );
-        const left = this.line.getLeft()!;
-        const right = this.line.getRight()!;
+        const endingPips = this.line.getEndingPips();
 
         const anyoneEmpty = this.players.some((player: Player) => player.isEmpty());
-        const allStuck = this.players.every((player) => player.isStuck(left, right));
+        const allStuck = this.players.every((player) => player.isStuck(endingPips));
 
         return anyoneEmpty || (allStuck && this.dominoSet.isEmpty());
     }
@@ -69,7 +66,7 @@ class Game {
     }
 
     public currentPlayerValidMoves(): Move[] {
-        return this.getCurrentPlayer().validMoves(this.line.getLeft(), this.line.getRight());
+        return this.getCurrentPlayer().validMoves(this.line.getEndingPips());
     }
 
     /**
@@ -81,17 +78,16 @@ class Game {
 
     /**
      * Move current player to the next player who is not blocked
-     * @returns players names who are blocked if all are blocked return undefined
+     * @return players names who are blocked if all are blocked return undefined
      */
-    public nextPlayerWhoIsNotBlocked(): string[] { 
-        const left = this.line.getLeft();
-        const right = this.line.getRight();        
+    public nextPlayerWhoIsNotBlocked(): string[] {
+        const endingPips = this.line.getEndingPips();
 
         const blocked: string[] = [];
 
         for (let i = 0; i < this.players.length; i++) {
             this.nextPlayer();
-            const isBlocked = this.getCurrentPlayer().isStuck(left, right) && this.dominoSet.isEmpty();
+            const isBlocked = this.getCurrentPlayer().isStuck(endingPips) && this.dominoSet.isEmpty();
             if (!isBlocked) {
                 break;
             }
@@ -103,12 +99,11 @@ class Game {
 
     /**
      * Draws a tile from the domino set until the tile is playable or the domino set is empty
-     * @returns the drawn tiles
+     * @return the drawn tiles
      */
     public drawUntilPlayable(): Tile[] {
         // There should always be a tile on the line before needing to draw
-        const left = this.line.getLeft()!;
-        const right = this.line.getLeft()!;
+        const endingPips = this.line.getEndingPips();
 
         const tilesDrawn: Tile[] = [];
 
@@ -116,7 +111,7 @@ class Game {
             const tile = this.dominoSet.draw()!;
             tilesDrawn.push(tile);
 
-            if (isMatching(tile, left) || isMatching(tile, right)) {
+            if (validMovesForTile(tile, endingPips).length > 0) {
                 break;
             }
         }

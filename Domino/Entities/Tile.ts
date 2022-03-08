@@ -16,23 +16,13 @@ function rotate(tile: Tile): Tile {
     };
 }
 
-function validMovesForTile(tile: Tile, left?: Tile, right?: Tile): Move[] {
+function validMovesForTile(tile: Tile, endingPips?: Tile): Move[] {
     const validMoves: Move[] = [];
 
     for (const t of [tile, rotate(tile)]) {
         for (const where of [Direction.Left, Direction.Right]) {
-            const move: Move = { where, tile: t, matching: undefined };
-
-            switch (where) {
-                case Direction.Left:
-                    move.matching = left;
-                    break;
-                case Direction.Right:
-                    move.matching = right;
-                    break;
-            }
-
-            if (isValid(move)) {
+            const move: Move = { where, tile: t };
+            if (isValid(move, endingPips)) {
                 validMoves.push(move);
             }
         }
