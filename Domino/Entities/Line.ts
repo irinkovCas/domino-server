@@ -1,4 +1,3 @@
-import { Direction, Move } from './Move';
 import { Tile } from './Tile';
 
 class Line {
@@ -8,19 +7,13 @@ class Line {
         this.tiles = tiles;
     }
 
-    public applyMove(move: Move): void {
-        if (move.where === Direction.Left) {
-            this.addLeft(move.tile);
-        } else {
-            this.addRight(move.tile);
-        }
-    }
-
     public addLeft(tile: Tile): void {
+        console.log('tiles', this.tiles);
         this.tiles.unshift(tile);
     }
 
     public addRight(tile: Tile): void {
+        console.log('tiles', this.tiles);
         this.tiles.push(tile);
     }
 
@@ -32,12 +25,14 @@ class Line {
         return this.tiles[this.tiles.length - 1];
     }
 
-    public getLeftRightPips(): Tile | undefined {
-        // if one of the pips is undefined than they both are undefined
-        const left = this.getLeft()?.firstPip;
-        const right = this.getRight()?.secondPip;
+    public getEndingPips(): Tile | undefined {
+        const left = this.getLeft();
+        const right = this.getRight();
+        return (left && right) ? { firstPip: left.firstPip, secondPip: right.secondPip } : undefined;
+    }
 
-        return (!left || !right) ? undefined : new Tile(left, right);
+    public isEmpty(): boolean {
+        return this.tiles.length === 0;
     }
 }
 

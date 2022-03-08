@@ -1,6 +1,6 @@
-import { SocketManager } from "./CommunicationLayer/SocketManager";
+import { SocketManager } from './CommunicationLayer/SocketManager';
 
 const PORT = process.env.PORT || 4567;
 
-let dominoServer = new SocketManager();
+const dominoServer = new SocketManager();
 dominoServer.listen(PORT);
