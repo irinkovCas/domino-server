@@ -1,34 +1,36 @@
-import { assert } from 'console';
+import { GameSettings } from '../common/config';
 import { DominoSet } from './Entities/DominoSet';
 import { Line } from './Entities/Line';
 import { Direction, Move } from './Entities/Move';
 import { Player } from './Entities/Player';
 import { Tile, validMovesForTile } from './Entities/Tile';
+import { State } from './States/IStateController';
 
 class Game {
-    /**
-     * Only if the players are blocked consecutively
-     */
-    public areAllPlayersBlocked(): boolean {
-        return this.blockedPlayerCount === this.players.length;
-    }
-
-    public blockedPlayerCount = 0;
-
     private readonly startingHandSize = 7;
 
-    /* private */ public readonly players: Player[];
-    private currentPlayerIndex: number;
-    /* private */ public readonly line: Line;
-    /* private */ public readonly dominoSet: DominoSet;
+    public settings: GameSettings;
 
-    public constructor(playerNames: string[]) {
-        this.dominoSet = new DominoSet();
-        this.dominoSet.shuffle();
+    public readonly players: Player[];
+    public currentPlayerIndex: number;
+    public line: Line;
+    public dominoSet: DominoSet;
+
+    public state: State;
+
+    public blockedPlayerCount = 0;
+    public currentRound = 0;
+
+    public constructor(playerNames: string[], settings: GameSettings) {
+        this.settings = settings;
 
         this.players = playerNames.map((name) => new Player(name, []));
         this.currentPlayerIndex = Math.floor(Math.random() * this.players.length);
+
         this.line = new Line();
+
+        this.dominoSet = new DominoSet();
+        this.dominoSet.shuffle();
     }
 
     public deal(): void {
@@ -37,18 +39,11 @@ class Game {
         });
     }
 
-    public isGameOver(): boolean {
-        assert(
-            !this.line.isEmpty(),
-            `Line should not be empty before before checking for game over.
-            There should be atlest 1 tile on the line`,
-        );
-        const endingPips = this.line.getEndingPips();
-
-        const anyoneEmpty = this.players.some((player: Player) => player.isEmpty());
-        const allStuck = this.players.every((player) => player.isStuck(endingPips));
-
-        return anyoneEmpty || (allStuck && this.dominoSet.isEmpty());
+    /**
+     * Only if the players are blocked consecutively
+     */
+    public areAllPlayersBlocked(): boolean {
+        return this.blockedPlayerCount === this.players.length;
     }
 
     public getCurrentPlayer(): Player {
@@ -72,29 +67,8 @@ class Game {
     /**
      * Moves current player to the next player
      */
-    public nextPlayer(): void {
+    public advancePlayer(): void {
         this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.length;
-    }
-
-    /**
-     * Move current player to the next player who is not blocked
-     * @return players names who are blocked if all are blocked return undefined
-     */
-    public nextPlayerWhoIsNotBlocked(): string[] {
-        const endingPips = this.line.getEndingPips();
-
-        const blocked: string[] = [];
-
-        for (let i = 0; i < this.players.length; i++) {
-            this.nextPlayer();
-            const isBlocked = this.getCurrentPlayer().isStuck(endingPips) && this.dominoSet.isEmpty();
-            if (!isBlocked) {
-                break;
-            }
-            blocked.push(this.getCurrentPlayer().name);
-        }
-
-        return blocked;
     }
 
     /**
@@ -117,6 +91,21 @@ class Game {
         }
 
         return tilesDrawn;
+    }
+
+    public isGameEnded(): boolean {
+        // check some condition
+        // Maybe if x amout of rounds have passed or
+        // A certain score was reached by a player
+        return false;
+    }
+
+    public reset(): void {
+        this.line = new Line();
+        // this.dominoSet.reset();
+        this.players.forEach((player) => {
+            player.tiles.length = 0;
+        });
     }
 }
 

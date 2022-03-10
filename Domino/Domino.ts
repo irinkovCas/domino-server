@@ -1,35 +1,40 @@
-import { GameRoom } from '../CommunicationLayer/SocketManager';
+import { Config } from '../common/config';
 import { Game } from './Game';
+import { GameRoom } from '../CommunicationLayer/GameRoom';
 import { DealController } from './States/DealController';
 import { DrawTileController } from './States/DrawTileController';
-import { EndRoundController } from './States/EndRoundController';
+import { RoundEndController } from './States/RoundEndController';
+import { GameEndController } from './States/GameEndController';
 import { IStateController, State } from './States/IStateController';
 import { PlayTileController } from './States/PlayTileController';
 import { StartRoundController } from './States/StartRoundController';
 
 class Domino {
-    /* private */ public game: Game;
+    public game: Game;
     private controller: IStateController;
-    private state: State;
 
-    /* private */ public room: GameRoom;
+    public room: GameRoom;
 
-    private endCallback: () => void;
+    public endCallback: () => void;
 
-    public constructor(room: GameRoom, onEnd: () => void) {
-        this.room = room;
-        this.game = new Game(room.players());
-        this.endCallback = onEnd;
+    public constructor(config: Config) {
+        this.room = config.room;
+        this.game = new Game(config.room.players(), config.gameSettings);
+        this.endCallback = config.endGameCallback;
     }
 
     public start(): void {
-        this.transition(State.StartRound);
+        this.transition(State.GameStart);
     }
 
     public transition(next: State): void {
+        console.log(`Transitioning from ${this.controller?.constructor.name} to ${next}`);
         this.controller?.destroy();
 
         switch (next) {
+            case State.GameStart:
+                this.controller = new StartRoundController(this);
+                break;
             case State.StartRound:
                 this.controller = new StartRoundController(this);
                 break;
@@ -42,15 +47,19 @@ class Domino {
             case State.DrawTile:
                 this.controller = new DrawTileController(this);
                 break;
-            case State.EndRound:
-                this.controller = new EndRoundController(this);
+            case State.RoundEnd:
+                this.controller = new RoundEndController(this);
+                break;
+            case State.GameEnd:
+                this.controller = new GameEndController(this);
                 break;
         }
 
         this.controller.start();
     }
 
-    public close(): void {
+    public destroy(): void {
+        this.controller?.destroy();
         this.room.close();
     }
 }

@@ -1,7 +1,6 @@
 import { Domino } from '../Domino';
 import { Player } from '../Entities/Player';
 import { Tile } from '../Entities/Tile';
-import { Event } from '../Events';
 import { IStateController, State } from './IStateController';
 
 class DrawTileController implements IStateController {
@@ -16,12 +15,12 @@ class DrawTileController implements IStateController {
     public start(): void {
         console.log('DrawTileController - start');
 
-        const tiles = this.domino.game.drawUntilPlayable();
+        const tiles: Tile[] = this.domino.game.drawUntilPlayable();
 
         this.player.tiles.push(...tiles);
         this.domino.room.send(
             this.player.name,
-            Event.TileDraw,
+            'tile_draw',
             { player: this.player.name, tiles }, // could be 1 or more tiles
         );
 
@@ -30,7 +29,7 @@ class DrawTileController implements IStateController {
 
         this.domino.room.sendAllBut(
             this.player.name,
-            Event.TileDraw,
+            'tile_draw',
             { player: this.player.name, tiles: zeroTiles }, // could be 1 or more tiles
         );
 

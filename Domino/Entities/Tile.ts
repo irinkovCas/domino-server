@@ -5,6 +5,10 @@ type Tile = {
     secondPip: number,
 }
 
+function score(tile: Tile): number {
+    return tile.firstPip + tile.secondPip;
+}
+
 function isMatching(a: Tile, b: Tile): boolean {
     return a.secondPip === b.firstPip;
 }
@@ -16,7 +20,7 @@ function rotate(tile: Tile): Tile {
     };
 }
 
-function validMovesForTile(tile: Tile, endingPips?: Tile): Move[] {
+function validMovesForTile(tile: Tile, endingPips: Tile | undefined): Move[] {
     const validMoves: Move[] = [];
 
     for (const t of [tile, rotate(tile)]) {
@@ -31,4 +35,4 @@ function validMovesForTile(tile: Tile, endingPips?: Tile): Move[] {
     return validMoves;
 }
 
-export { Tile, isMatching, rotate, validMovesForTile };
+export { Tile, isMatching, rotate, validMovesForTile, score };

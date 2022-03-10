@@ -1,6 +1,7 @@
 import express, { Express } from 'express';
 import * as http from 'http';
 import { Server, Socket } from 'socket.io';
+import { Config } from '../common/config';
 // const socketIO = require('socket.io'); // not using import because this is an old version
 import { Domino } from '../Domino/Domino';
 import { GameRoom } from './GameRoom';
@@ -33,7 +34,15 @@ class SocketManager {
             console.log(`Server running on http://localhost:${port}...`);
         });
 
-        this.io.on('connection', (socket: any) => {
+        this.io.on('connection', (socket) => {
+            socket.on('noArg', () => {
+                // .
+            });
+
+            socket.on('basicEmit', (a, b, c) => {
+                console.log(a, b, c);
+            });
+
             console.log('Client connected');
 
             // name is the same as socket.id for now
@@ -43,11 +52,9 @@ class SocketManager {
             this.queuePlayer(player);
             console.log('Client connected something elswe ');
 
-            socket.emit('message', { data: 'Welcome to the game' });
-
             socket.on('disconnect', () => {
-                this.clients.delete(socket.id);
-                this.waitingToStart.delete(socket.id);
+                this.clients.delete(player);
+                this.waitingToStart.delete(player);
 
                 console.log('Client disconnected');
             });
@@ -61,10 +68,10 @@ class SocketManager {
             this.createGame([...this.waitingToStart]);
             this.waitingToStart.clear();
         } else if (this.waitingToStart.size < this.playersToStartAGame) {
-            this.clients.get(player)!.emit('message', { data: 'Waiting for more 1 player' });
+            // this.clients.get(player)!.emit('message', { data: 'Waiting for more 1 player' });
         } else {
             // should be unreachable
-            this.clients.get(player)!.emit('message', { data: 'Sorry! The game is full' });
+            // this.clients.get(player)!.emit('message', { data: 'Sorry! The game is full' });
         }
     }
 
@@ -74,20 +81,26 @@ class SocketManager {
             roomClients.set(player.name, this.clients.get(player)!);
         }
 
-        const roomName = `${players[0].name} vs ${players[1].name}`;
-        const gameRoom = new GameRoom(roomName, this.io, roomClients);
-        const domino = new Domino(gameRoom, () => console.log('Domino closed'));
+        const config: Config = {
+            room: new GameRoom(`${players[0].name} vs ${players[1].name}`, this.io, roomClients),
+            gameSettings: { maxScore: 100 },
+            endGameCallback: () => {
+                console.log('end game callback');
+            },
+        };
+
+        const domino = new Domino(config);
         this.dominoes.push(domino);
         domino.start(); // runs the game
     }
 
     public close(): void {
         for (const domino of this.dominoes) {
-            domino.close();
+            domino.destroy();
         }
         this.io.close();
         this.server.close();
     }
 }
 
-export { SocketManager, GameRoom };
+export { SocketManager };

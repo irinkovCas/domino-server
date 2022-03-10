@@ -5,13 +5,14 @@ import { rotate, Tile, validMovesForTile } from './Tile';
 class Player {
     public readonly name: string;
     public readonly tiles: Tile[];
+    public score = 0;
 
     public constructor(name: string, tiles: Tile[]) {
         this.name = name;
         this.tiles = tiles;
     }
 
-    public isEmpty(): boolean {
+    public isHandEmpty(): boolean {
         return this.tiles.length === 0;
     }
 
@@ -31,6 +32,14 @@ class Player {
     public isStuck(endingPips?: Tile): boolean {
         return this.validMoves(endingPips).length === 0;
     }
+
+    // public serialize(): Record<string, any> {
+    //     return {
+    //         name: this.name,
+    //         score: this.score,
+    //         tiles: this.tiles,
+    //     };
+    // }
 }
 
 export { Player };

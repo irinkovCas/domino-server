@@ -1,9 +1,11 @@
 enum State {
+    GameStart,
     StartRound,
-    EndRound,
-    PlayTile,
     Deal,
+    PlayTile,
     DrawTile,
+    RoundEnd,
+    GameEnd,
 }
 
 interface IStateController {

@@ -1,5 +1,4 @@
 import { Domino } from '../Domino';
-import { Event } from '../Events';
 import { IStateController, State } from './IStateController';
 
 class StartRoundController implements IStateController {
@@ -10,8 +9,10 @@ class StartRoundController implements IStateController {
     }
 
     public start(): void {
-        const players = this.domino.game.players.map((p) => p.name);
-        this.domino.room.sendAll(Event.GameInit, { players });
+        this.domino.game.reset();
+
+        this.domino.room.sendAll('start_round', { dominoSet: /* ... */ });
+
         this.domino.transition(State.Deal);
     }
 

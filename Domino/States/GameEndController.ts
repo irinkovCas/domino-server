@@ -1,7 +1,7 @@
 import { Domino } from '../Domino';
 import { IStateController } from './IStateController';
 
-class EndRoundController implements IStateController {
+class GameEndController implements IStateController {
     private domino: Domino;
 
     public constructor(domino: Domino) {
@@ -9,13 +9,14 @@ class EndRoundController implements IStateController {
     }
 
     public start(): void {
-        console.log('EndRoundController - start');
+        this.domino.endCallback();
+        //
     }
 
     public destroy(): void {
-        throw new Error('Method not implemented.');
+        //
     }
 }
 
-export { EndRoundController };
 
+export { GameEndController };

@@ -1,11 +1,11 @@
 import { Domino } from '../Domino';
-import { Event } from '../Events';
 import { IStateController, State } from './IStateController';
 
 class DealController implements IStateController {
     private readonly DEAL_DELAY = 500;
 
     private domino: Domino;
+    private timer: NodeJS.Timeout;
 
     public constructor(domino: Domino) {
         this.domino = domino;
@@ -15,10 +15,10 @@ class DealController implements IStateController {
         this.domino.game.deal();
 
         this.domino.game.players.forEach((player) => {
-            this.domino.room.send(player.name, Event.Deal, { tiles: player.tiles });
+            this.domino.room.send(player.name, 'deal', { tiles: player.tiles });
         });
 
-        setTimeout(
+        this.timer = setTimeout(
             () => {
                 this.domino.transition(State.PlayTile);
             },
@@ -27,7 +27,7 @@ class DealController implements IStateController {
     }
 
     public destroy(): void {
-        // throw new Error("Method not implemented.");
+        clearTimeout(this.timer);
     }
 }
 

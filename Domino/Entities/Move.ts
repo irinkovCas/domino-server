@@ -6,12 +6,12 @@ enum Direction {
 }
 
 type Move = {
-    tile: Tile;
     where: Direction;
+    tile: Tile;
 }
 
-function isValid(move: Move, endingPips?: Tile): boolean {
-    if (endingPips === undefined) {
+function isValid(move: Move, endingPips: Tile | undefined): boolean {
+    if (endingPips == undefined) {
         return true;
     }
 

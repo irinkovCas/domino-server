@@ -15,6 +15,7 @@ class DominoSet {
         return this.tiles.length === 0;
     }
 
+    // fisher-yates shuffle
     public shuffle(): void {
         for (let i = this.tiles.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
