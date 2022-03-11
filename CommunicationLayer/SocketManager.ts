@@ -1,7 +1,7 @@
 import express, { Express } from 'express';
 import * as http from 'http';
 import { Server, Socket } from 'socket.io';
-import { Config } from '../common/config';
+import { Config } from '../commonNotReallyBecauseTheClientIsInC#/config';
 // const socketIO = require('socket.io'); // not using import because this is an old version
 import { Domino } from '../Domino/Domino';
 import { GameRoom } from './GameRoom';
@@ -35,14 +35,6 @@ class SocketManager {
         });
 
         this.io.on('connection', (socket) => {
-            socket.on('noArg', () => {
-                // .
-            });
-
-            socket.on('basicEmit', (a, b, c) => {
-                console.log(a, b, c);
-            });
-
             console.log('Client connected');
 
             // name is the same as socket.id for now
@@ -50,7 +42,6 @@ class SocketManager {
 
             this.clients.set(player, socket);
             this.queuePlayer(player);
-            console.log('Client connected something elswe ');
 
             socket.on('disconnect', () => {
                 this.clients.delete(player);
@@ -81,17 +72,24 @@ class SocketManager {
             roomClients.set(player.name, this.clients.get(player)!);
         }
 
+        const roomName = `${players[0].name} vs ${players[1].name}`;
         const config: Config = {
-            room: new GameRoom(`${players[0].name} vs ${players[1].name}`, this.io, roomClients),
-            gameSettings: { maxScore: 100 },
-            endGameCallback: () => {
-                console.log('end game callback');
-            },
+            // Each room must have a unique name
+            room: new GameRoom(roomName, this.io, roomClients),
+            gameSettings: { maxScore: 0, timeToPlay: 0 },
+            endGameCallback: this.test.bind(this),
+            // endGameCallback: () => {
+            //     console.log('end game callback');
+            // },
         };
 
         const domino = new Domino(config);
         this.dominoes.push(domino);
         domino.start(); // runs the game
+    }
+
+    public test(): void {
+        console.log('end game callback');
     }
 
     public close(): void {

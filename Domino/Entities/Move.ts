@@ -5,7 +5,7 @@ enum Direction {
     Right = 1
 }
 
-type Move = {
+interface Move {
     where: Direction;
     tile: Tile;
 }

@@ -1,30 +1,36 @@
-import { Config } from '../common/config';
-import { Game } from './Game';
+import { ClientToServerEvent } from '../commonNotReallyBecauseTheClientIsInC#/ClientToServerEvent';
+import { Config } from '../commonNotReallyBecauseTheClientIsInC#/config';
+import { ServerToClientEvent } from '../commonNotReallyBecauseTheClientIsInC#/ServerToClientEvent';
 import { GameRoom } from '../CommunicationLayer/GameRoom';
+import { Game } from './Game';
 import { DealController } from './States/DealController';
 import { DrawTileController } from './States/DrawTileController';
-import { RoundEndController } from './States/RoundEndController';
 import { GameEndController } from './States/GameEndController';
 import { IStateController, State } from './States/IStateController';
 import { PlayTileController } from './States/PlayTileController';
+import { RoundEndController } from './States/RoundEndController';
 import { StartRoundController } from './States/StartRoundController';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type DominoGameRoom = GameRoom<ClientToServerEvent, ServerToClientEvent>
 class Domino {
     public game: Game;
     private controller: IStateController;
 
-    public room: GameRoom;
+    public room: DominoGameRoom;
 
-    public endCallback: () => void;
+    public endResolve: (value: void | PromiseLike<void>) => void;
 
     public constructor(config: Config) {
         this.room = config.room;
         this.game = new Game(config.room.players(), config.gameSettings);
-        this.endCallback = config.endGameCallback;
     }
 
-    public start(): void {
-        this.transition(State.GameStart);
+    public start(): Promise<void> {
+        return new Promise((resolve, _reject) => {
+            this.transition(State.GameStart);
+            this.endResolve = resolve;
+        });
     }
 
     public transition(next: State): void {
@@ -64,4 +70,4 @@ class Domino {
     }
 }
 
-export { Domino };
+export { Domino, DominoGameRoom };

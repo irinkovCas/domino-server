@@ -10,8 +10,7 @@ class StartRoundController implements IStateController {
 
     public start(): void {
         this.domino.game.reset();
-
-        this.domino.room.sendAll('start_round', { dominoSet: /* ... */ });
+        this.domino.room.sendAll('start_round', { dominoSet: this.domino.game.dominoSet.getSize() });
 
         this.domino.transition(State.Deal);
     }

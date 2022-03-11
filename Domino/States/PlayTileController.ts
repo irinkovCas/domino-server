@@ -1,13 +1,12 @@
 import equal from 'fast-deep-equal';
-import { GameRoom } from '../../CommunicationLayer/GameRoom';
-import { Domino } from '../Domino';
+import { Domino, DominoGameRoom } from '../Domino';
 import { Move } from '../Entities/Move';
 import { Player } from '../Entities/Player';
 import { Game } from '../Game';
 import { IStateController, State } from './IStateController';
 
 class PlayTileController implements IStateController {
-    private TIME_TO_PLAY = 15_000; // TODO: should go into a config
+    private timeToPlay: number;
 
     private validMoves: Move[];
     private player: Player;
@@ -17,13 +16,14 @@ class PlayTileController implements IStateController {
     private onGameMessageListener: (move: Move) => void;
 
     private game: Game;
-    private room: GameRoom;
+    private room: DominoGameRoom;
     private transition: (state: State) => void;
 
     public constructor(domino: Domino) {
         this.game = domino.game;
         this.room = domino.room;
         this.transition = domino.transition;
+        this.timeToPlay = domino.game.settings.timeToPlay;
     }
 
     public start(): void {
@@ -53,10 +53,10 @@ class PlayTileController implements IStateController {
                 'tile_play_request',
                 { player: name, moves: this.validMoves },
             );
-            this.room.sendAllBut(name, 'tile_play_request', { player: name });
+            this.room.sendAllBut(name, 'tile_play_request', { player: name, moves: [] });
 
             this.onGameMessageListener = this.onGameMessage.bind(this);
-            this.timeout = setTimeout(() => this.playerTimeout(), this.TIME_TO_PLAY);
+            this.timeout = setTimeout(() => this.playerTimeout(), this.timeToPlay);
             this.room.listenToPlayer(name, 'tile_play', this.onGameMessageListener);
         }
     }
@@ -77,7 +77,7 @@ class PlayTileController implements IStateController {
     private playMove(move: Move): void {
         // There is a chance that the player played a move but the time ran out on the server and he must be notified that the move he played didn't count
         // this case must be handled in the client!
-        this.room.sendAll('tile_play_notification', { player: 'this.player.name', move: 0 });
+        this.room.sendAll('tile_play_notification', { player: this.player.name, move });
         this.game.applyMove(move);
 
         if (this.player.isHandEmpty()) {

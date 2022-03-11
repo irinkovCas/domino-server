@@ -9,8 +9,9 @@ class GameEndController implements IStateController {
     }
 
     public start(): void {
-        this.domino.endCallback();
-        //
+        // this.timer = new Timer(this.server.gameInfo.configuration.timers.passing, this.onMoveTimeout.bind(this), false);
+        this.domino.room.sendAll('game_end', {});
+        this.domino.endResolve();
     }
 
     public destroy(): void {

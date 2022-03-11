@@ -1,4 +1,4 @@
-import { GameSettings } from '../common/config';
+import { GameSettings } from '../commonNotReallyBecauseTheClientIsInC#/config';
 import { DominoSet } from './Entities/DominoSet';
 import { Line } from './Entities/Line';
 import { Direction, Move } from './Entities/Move';
@@ -94,10 +94,7 @@ class Game {
     }
 
     public isGameEnded(): boolean {
-        // check some condition
-        // Maybe if x amout of rounds have passed or
-        // A certain score was reached by a player
-        return false;
+        return this.players.some((player) => player.score >= this.settings.maxScore);
     }
 
     public reset(): void {

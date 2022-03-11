@@ -30,6 +30,10 @@ class DominoSet {
     public drawN(n: number): Tile[] {
         return this.tiles.splice(0, n);
     }
+
+    public getSize(): number {
+        return this.tiles.length;
+    }
 }
 
 export { DominoSet };

@@ -1,17 +1,19 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import { Server, Socket } from 'socket.io';
-import { ClientToServerEvents } from '../common/ClientToServerEvents';
-import { ServerToClientsEvent } from '../common/ServerToClientsEvent';
+import { ClientToServerEvent } from '../commonNotReallyBecauseTheClientIsInC#/ClientToServerEvent';
+import { ServerToClientEvent } from '../commonNotReallyBecauseTheClientIsInC#/ServerToClientEvent';
 
-interface EventsMap {
+type EventsMap = {
     [event: string]: any;
 }
 
-type EventNames<Map extends EventsMap> = keyof Map & (string | symbol);
+type EventNames<Map extends EventsMap> = keyof Map & (string);
 type EventParam<Map extends EventsMap, Ev extends EventNames<Map>> = Map[Ev];
 
-class GameRoom {
+class GameRoom<
+    ListenEvents extends EventsMap = ClientToServerEvent,
+    SendEvents extends EventsMap = ServerToClientEvent> {
     private readonly name: string;
 
     private readonly io: Server;
@@ -31,13 +33,13 @@ class GameRoom {
     //     this.io.in(this.name).on(event, callback);
     // }
 
-    public listenToPlayer<Ev extends EventNames<ClientToServerEvents>>(
+    public listenToPlayer<Ev extends EventNames<ListenEvents>>(
         playerName: string,
         event: Ev,
-        callback: (data: EventParam<ClientToServerEvents, Ev>) => void,
+        listener: (data: EventParam<ListenEvents, Ev>) => void,
     ): void {
         console.log(`listenToPlayer ${playerName} ${String(event)}`);
-        this.clients.get(playerName)!.on(String(event), callback);
+        this.clients.get(playerName)!.on(String(event), listener);
     }
 
     // public listenToPlayerOnce<Data>(
@@ -53,38 +55,37 @@ class GameRoom {
     //     this.io.in(this.name).once(event, callback);
     // }
 
-    public removeListenerFrom<Ev extends EventNames<ClientToServerEvents>>(
+    public removeListenerFrom<Ev extends EventNames<ListenEvents>>(
         playerName: string,
         event: Ev,
-        listener: (data: EventParam<ClientToServerEvents, Ev>) => void,
+        listener: (data: EventParam<ListenEvents, Ev>) => void,
     ): void {
         console.log(`removeListenerFrom ${playerName} ${String(event)}`);
         // this.clients.get(playerName)!.off(event);
         this.clients.get(playerName)!.off(String(event), listener);
     }
 
-    public send<Ev extends EventNames<ServerToClientsEvent>>(
+    public send<Ev extends EventNames<SendEvents>>(
         playerName: string,
         event: Ev,
-        data: EventParam<ServerToClientsEvent, Ev>,
+        data: EventParam<SendEvents, Ev>,
     ): void {
-        // console.log(`send ${playerName} ${event} ${JSON.stringify(data, null, 4)}`);
         console.log(`send ${playerName} ${String(event)} ${JSON.stringify(data)}`);
         this.clients.get(playerName)!.emit(event, data);
     }
 
-    public sendAll<Ev extends EventNames<ServerToClientsEvent>>(
+    public sendAll<Ev extends EventNames<SendEvents>>(
         event: Ev,
-        data: EventParam<ServerToClientsEvent, Ev>,
+        data: EventParam<SendEvents, Ev>,
     ): void {
         console.log(`sendAll ${String(event)} ${JSON.stringify(data, null, 4)}`);
         this.io.in(this.name).emit(event, data);
     }
 
-    public sendAllBut<Ev extends EventNames<ServerToClientsEvent>>(
+    public sendAllBut<Ev extends EventNames<SendEvents>>(
         playerName: string,
         event: Ev,
-        data: EventParam<ServerToClientsEvent, Ev>,
+        data: EventParam<SendEvents, Ev>,
     ): void {
         console.log(`sendAllBut ${playerName} ${String(event)} ${JSON.stringify(data, null, 4)}`);
         this.clients.get(playerName)!.to(this.name).emit(event, data);

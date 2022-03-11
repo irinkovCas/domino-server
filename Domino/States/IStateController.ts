@@ -1,11 +1,18 @@
 enum State {
+    /** GameStart -> StartRound */
     GameStart,
+    /** StartRound -> Deal */
     StartRound,
+    /** Deal -> PlayTile */
     Deal,
+    /** PlayTile -> PlayTile | DrawTile | RoundEnd */
     PlayTile,
+    /** DrawTile -> PlayTile */
     DrawTile,
+    /** RoundEnd -> StartRound | GameEnd */
     RoundEnd,
-    GameEnd,
+    /** GameEnd -> (End state) */
+    GameEnd, // (End state)
 }
 
 interface IStateController {

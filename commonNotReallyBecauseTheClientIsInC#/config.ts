@@ -1,7 +1,12 @@
+/* eslint-disable @typescript-eslint/ban-types */
 import { GameRoom } from '../CommunicationLayer/GameRoom';
 
 interface GameSettings {
     maxScore: number;
+    /**
+     * Time in miliseconds
+     */
+    timeToPlay: number;
 }
 
 interface Config {

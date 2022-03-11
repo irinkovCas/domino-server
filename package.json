@@ -5,7 +5,7 @@
     "main": "index.js",
     "scripts": {
         "lint": "eslint \"./Domino/**\" --ext .ts --fix",
-        "test": "npx mocha ./build/test --watch --timeout 5000",
+        "test": "npx mocha  --require ts-node/register ./test/** --watch --timeout 60000",
         "build": "npx tsc",
         "dev": "nodemon index.ts --watch"
     },
