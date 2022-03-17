@@ -6,7 +6,14 @@ class DominoSet {
     public constructor() {
         for (let i = 0; i <= 6; i++) {
             for (let j = i; j <= 6; j++) {
-                this.tiles.push({ firstPip: i, secondPip: j });
+                this.tiles.push(
+                    // This doesn't make a diffrence for the server, but makes a difference on the client
+                    // For Example: The client wont recieve a [1,6] tile every time
+                    // 50% chance of being a [6,1] tile
+                    Math.random() > 0.5 ?
+                        { firstPip: i, secondPip: j } :
+                        { firstPip: j, secondPip: i },
+                );
             }
         }
     }

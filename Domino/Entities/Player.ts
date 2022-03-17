@@ -3,7 +3,7 @@ import { Move } from './Move';
 import { rotate, Tile, validMovesForTile } from './Tile';
 
 class Player {
-    public readonly name: string;
+    public /* readonly */ name: string;
     public readonly tiles: Tile[];
     public score = 0;
 

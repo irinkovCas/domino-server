@@ -76,20 +76,15 @@ class SocketManager {
         const config: Config = {
             // Each room must have a unique name
             room: new GameRoom(roomName, this.io, roomClients),
-            gameSettings: { maxScore: 0, timeToPlay: 0 },
-            endGameCallback: this.test.bind(this),
-            // endGameCallback: () => {
-            //     console.log('end game callback');
-            // },
+            gameSettings: { maxScore: 0, timeToPlay: 15_000 },
+            endGameCallback: () => {
+                console.log('end game callback');
+            },
         };
 
         const domino = new Domino(config);
         this.dominoes.push(domino);
         domino.start(); // runs the game
-    }
-
-    public test(): void {
-        console.log('end game callback');
     }
 
     public close(): void {

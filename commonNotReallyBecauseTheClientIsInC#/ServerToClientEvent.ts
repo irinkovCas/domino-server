@@ -1,10 +1,15 @@
 import { MoveData, PlayerData, TileData } from './types';
 
+// // expands object types recursively
+// type ExpandRecursively<T> = T extends object
+//   ? T extends infer O ? { [K in keyof O]: ExpandRecursively<O[K]> } : never
+//   : T;
+
 interface ServerToClientEvent {
-    game_init: {
+    game_start: {
         players: string[];
     };
-    start_round: {
+    round_start: {
         dominoSet: number;
     };
     deal: {
@@ -40,13 +45,12 @@ interface ServerToClientEvent {
 // }
 
 // interface StartRound {
-//     dominoSet: DominoSet;
+//     dominoSet: number;
 // }
 
 // interface Deal {
 //     players: string,
 //     tiles: TileData[],
-//     dominoSet: DominoSet,
 // }
 
 // interface TilePlayRequest {
@@ -80,7 +84,7 @@ interface ServerToClientEvent {
 // // eslint-disable-next-line @typescript-eslint/no-empty-interface
 // interface GameEnd { }
 
-// interface ServerToClientsEvent {
+// interface ServerToClientEvent {
 //     game_init: GameInit;
 //     start_round: StartRound;
 //     deal: Deal;

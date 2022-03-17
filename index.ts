@@ -11,31 +11,31 @@ const PORT = process.env.PORT || 4567;
 const dominoServer = new SocketManager();
 dominoServer.listen(PORT);
 
-const sockets: Socket[] = [];
+// const sockets: Socket[] = [];
 
-for (let i = 0; i < 2; i++) {
-    const clientSocket: Socket = Client(`http://localhost:${PORT}`);
-    sockets.push(clientSocket);
-}
+// for (let i = 0; i < 2; i++) {
+//     const clientSocket: Socket = Client(`http://localhost:${PORT}`);
+//     sockets.push(clientSocket);
+// }
 
-const p2: Promise<void> = new Promise((resolve, _reject) => {
-    console.log('waiting for socketManager to be ready');
-    sockets[0].on('connect', () => {
-        console.log(`${sockets[0].id}`);
-        resolve();
-    });
-});
+// const p2: Promise<void> = new Promise((resolve, _reject) => {
+//     // console.log('waiting for socketManager to be ready');
+//     sockets[0].on('connect', () => {
+//         // console.log(`${sockets[0].id}`);
+//         resolve();
+//     });
+// });
 
-const p1: Promise<void> = new Promise((resolve, _reject) => {
-    sockets[1].on('connect', () => {
-        console.log(`${sockets[1].id}`);
-        resolve();
-    });
-});
+// const p1: Promise<void> = new Promise((resolve, _reject) => {
+//     sockets[1].on('connect', () => {
+//         // console.log(`${sockets[1].id}`);
+//         resolve();
+//     });
+// });
 
-Promise.all([p1, p2]).then(() => {
-    console.log('Both connected');
-});
+// Promise.all([p1, p2]).then(() => {
+//     // console.log('Both connected');
+// });
 
 
 // type ValueOf<T> = T[keyof T];

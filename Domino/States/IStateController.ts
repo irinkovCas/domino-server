@@ -2,7 +2,7 @@ enum State {
     /** GameStart -> StartRound */
     GameStart,
     /** StartRound -> Deal */
-    StartRound,
+    RoundStart,
     /** Deal -> PlayTile */
     Deal,
     /** PlayTile -> PlayTile | DrawTile | RoundEnd */

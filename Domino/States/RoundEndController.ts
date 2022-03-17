@@ -8,6 +8,7 @@ import { IStateController, State } from './IStateController';
 
 class RoundEndController implements IStateController {
     private domino: Domino;
+    private timer: NodeJS.Timeout;
 
     public constructor(domino: Domino) {
         this.domino = domino;
@@ -50,15 +51,17 @@ class RoundEndController implements IStateController {
 
         this.domino.room.sendAll('round_end', { winner: winner.name, players });
 
-        if (this.domino.game.isGameEnded()) {
-            this.domino.transition(State.GameEnd);
-        } else {
-            this.domino.transition(State.StartRound);
-        }
+        this.timer = setTimeout(() => {
+            if (this.domino.game.isGameEnded()) {
+                this.domino.transition(State.GameEnd);
+            } else {
+                this.domino.transition(State.RoundStart);
+            }
+        }, 1_000);
     }
 
     public destroy(): void {
-        //
+        clearTimeout(this.timer);
     }
 }
 

@@ -1,8 +1,7 @@
 import equal from 'fast-deep-equal';
-import { Domino, DominoGameRoom } from '../Domino';
+import { Domino } from '../Domino';
 import { Move } from '../Entities/Move';
 import { Player } from '../Entities/Player';
-import { Game } from '../Game';
 import { IStateController, State } from './IStateController';
 
 class PlayTileController implements IStateController {
@@ -15,49 +14,45 @@ class PlayTileController implements IStateController {
 
     private onGameMessageListener: (move: Move) => void;
 
-    private game: Game;
-    private room: DominoGameRoom;
-    private transition: (state: State) => void;
+    private domino: Domino;
 
     public constructor(domino: Domino) {
-        this.game = domino.game;
-        this.room = domino.room;
-        this.transition = domino.transition;
+        this.domino = domino;
         this.timeToPlay = domino.game.settings.timeToPlay;
     }
 
     public start(): void {
-        this.player = this.game.getCurrentPlayer();
+        this.player = this.domino.game.getCurrentPlayer();
         const name = this.player.name;
 
-        this.validMoves = this.game.currentPlayerValidMoves();
+        this.validMoves = this.domino.game.currentPlayerValidMoves();
 
-        if (this.validMoves.length === 0 && !this.game.dominoSet.isEmpty()) {
-            this.room.sendAll('stuck', { player: name });
-            this.transition(State.DrawTile);
-        } else if (this.validMoves.length === 0 && this.game.dominoSet.isEmpty()) {
-            this.game.blockedPlayerCount += 1;
-            this.room.sendAll('blocked', { player: name });
+        if (this.validMoves.length === 0 && !this.domino.game.dominoSet.isEmpty()) {
+            this.domino.room.sendAll('stuck', { player: name });
+            this.domino.transition(State.DrawTile);
+        } else if (this.validMoves.length === 0 && this.domino.game.dominoSet.isEmpty()) {
+            this.domino.game.blockedPlayerCount += 1;
+            this.domino.room.sendAll('blocked', { player: name });
 
-            if (this.game.areAllPlayersBlocked()) {
-                this.transition(State.RoundEnd);
+            if (this.domino.game.areAllPlayersBlocked()) {
+                this.domino.transition(State.RoundEnd);
             } else {
-                this.game.advancePlayer();
-                this.transition(State.PlayTile);
+                this.domino.game.advancePlayer();
+                this.domino.transition(State.PlayTile);
             }
         } else if (this.validMoves.length > 0) {
-            this.game.blockedPlayerCount = 0;
+            this.domino.game.blockedPlayerCount = 0;
 
-            this.room.send(
+            this.domino.room.send(
                 name,
                 'tile_play_request',
                 { player: name, moves: this.validMoves },
             );
-            this.room.sendAllBut(name, 'tile_play_request', { player: name, moves: [] });
+            this.domino.room.sendAllBut(name, 'tile_play_request', { player: name, moves: [] });
 
             this.onGameMessageListener = this.onGameMessage.bind(this);
             this.timeout = setTimeout(() => this.playerTimeout(), this.timeToPlay);
-            this.room.listenToPlayer(name, 'tile_play', this.onGameMessageListener);
+            this.domino.room.listenToPlayer(name, 'tile_play', this.onGameMessageListener);
         }
     }
 
@@ -65,7 +60,7 @@ class PlayTileController implements IStateController {
         console.log('PlayTileController: onGameMessage called with move: ', move);
         // if the move is valid, play it
         if (this.validMoves.some((m) => equal(m, move))) {
-            this.room.removeListenerFrom(this.player.name, 'tile_play', this.onGameMessageListener);
+            this.domino.room.removeListenerFrom(this.player.name, 'tile_play', this.onGameMessageListener);
             console.log(`PlayTileController: onGameMessage: move(${move}) is valid`);
             clearTimeout(this.timeout);
             this.playMove(move);
@@ -77,20 +72,20 @@ class PlayTileController implements IStateController {
     private playMove(move: Move): void {
         // There is a chance that the player played a move but the time ran out on the server and he must be notified that the move he played didn't count
         // this case must be handled in the client!
-        this.room.sendAll('tile_play_notification', { player: this.player.name, move });
-        this.game.applyMove(move);
+        this.domino.room.sendAll('tile_play_notification', { player: this.player.name, move });
+        this.domino.game.applyMove(move);
 
         if (this.player.isHandEmpty()) {
-            this.transition(State.RoundEnd);
+            this.domino.transition(State.RoundEnd);
         } else {
-            this.game.advancePlayer();
-            this.transition(State.PlayTile);
+            this.domino.game.advancePlayer();
+            this.domino.transition(State.PlayTile);
         }
     }
 
     private playerTimeout(): void {
         console.log('PlayTileController: playerTimeout called');
-        this.room.removeListenerFrom(this.player.name, 'tile_play', this.onGameMessageListener);
+        this.domino.room.removeListenerFrom(this.player.name, 'tile_play', this.onGameMessageListener);
 
         // we will play a move for him
         // randomly pick a move
@@ -100,8 +95,12 @@ class PlayTileController implements IStateController {
 
     public destroy(): void {
         // throw new Error("Method not implemented.");
-        this.room.removeListenerFrom(this.player.name, 'tile_play', this.onGameMessageListener);
-        clearTimeout(this.timeout);
+        if (this.onGameMessageListener !== undefined) {
+            this.domino.room.removeListenerFrom(this.player.name, 'tile_play', this.onGameMessageListener);
+        }
+        if (this.timeout !== undefined) {
+            clearTimeout(this.timeout);
+        }
     }
 }
 

@@ -1,8 +1,7 @@
 import { Domino } from '../Domino';
 import { IStateController, State } from './IStateController';
 
-
-class GameStartController implements IStateController {
+class RoundStartController implements IStateController {
     private domino: Domino;
     private timer: NodeJS.Timeout;
 
@@ -11,11 +10,11 @@ class GameStartController implements IStateController {
     }
 
     public start(): void {
-        const players: string[] = this.domino.game.players.map((p) => p.name);
-        this.domino.room.sendAll('game_start', { players });
+        this.domino.game.reset();
+        this.domino.room.sendAll('round_start', { dominoSet: this.domino.game.dominoSet.getSize() });
 
         this.timer = setTimeout(() => {
-            this.domino.transition(State.RoundStart);
+            this.domino.transition(State.Deal);
         }, 1_000);
     }
 
@@ -24,5 +23,4 @@ class GameStartController implements IStateController {
     }
 }
 
-
-export { GameStartController };
+export { RoundStartController };

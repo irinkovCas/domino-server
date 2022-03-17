@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-inferrable-types */
 import { ClientToServerEvent } from '../commonNotReallyBecauseTheClientIsInC#/ClientToServerEvent';
 import { Config } from '../commonNotReallyBecauseTheClientIsInC#/config';
 import { ServerToClientEvent } from '../commonNotReallyBecauseTheClientIsInC#/ServerToClientEvent';
@@ -6,10 +7,11 @@ import { Game } from './Game';
 import { DealController } from './States/DealController';
 import { DrawTileController } from './States/DrawTileController';
 import { GameEndController } from './States/GameEndController';
+import { GameStartController } from './States/GameStartController';
 import { IStateController, State } from './States/IStateController';
 import { PlayTileController } from './States/PlayTileController';
 import { RoundEndController } from './States/RoundEndController';
-import { StartRoundController } from './States/StartRoundController';
+import { RoundStartController } from './States/RoundStartController';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type DominoGameRoom = GameRoom<ClientToServerEvent, ServerToClientEvent>
@@ -18,19 +20,16 @@ class Domino {
     private controller: IStateController;
 
     public room: DominoGameRoom;
-
-    public endResolve: (value: void | PromiseLike<void>) => void;
+    public endGameCallback: () => void;
 
     public constructor(config: Config) {
         this.room = config.room;
         this.game = new Game(config.room.players(), config.gameSettings);
+        this.endGameCallback = config.endGameCallback;
     }
 
-    public start(): Promise<void> {
-        return new Promise((resolve, _reject) => {
-            this.transition(State.GameStart);
-            this.endResolve = resolve;
-        });
+    public start(): void {
+        this.transition(State.GameStart);
     }
 
     public transition(next: State): void {
@@ -39,10 +38,10 @@ class Domino {
 
         switch (next) {
             case State.GameStart:
-                this.controller = new StartRoundController(this);
+                this.controller = new GameStartController(this);
                 break;
-            case State.StartRound:
-                this.controller = new StartRoundController(this);
+            case State.RoundStart:
+                this.controller = new RoundStartController(this);
                 break;
             case State.Deal:
                 this.controller = new DealController(this);

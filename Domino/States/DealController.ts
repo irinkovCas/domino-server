@@ -2,7 +2,7 @@ import { Domino } from '../Domino';
 import { IStateController, State } from './IStateController';
 
 class DealController implements IStateController {
-    private readonly DEAL_DELAY = 500;
+    private readonly DEAL_DELAY = 6_000;
 
     private domino: Domino;
     private timer: NodeJS.Timeout;
