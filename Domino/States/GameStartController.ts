@@ -12,7 +12,11 @@ class GameStartController implements IStateController {
 
     public start(): void {
         const players: string[] = this.domino.game.players.map((p) => p.name);
-        this.domino.room.sendAll('game_start', { players });
+        this.domino.room.sendAll('game_start', {
+            players,
+            turnTime: this.domino.game.settings.timeToPlay,
+            maxScore: this.domino.game.settings.maxScore,
+        });
 
         this.timer = setTimeout(() => {
             this.domino.transition(State.RoundStart);

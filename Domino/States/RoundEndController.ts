@@ -49,7 +49,11 @@ class RoundEndController implements IStateController {
 
         const players = this.domino.game.players;
 
-        this.domino.room.sendAll('round_end', { winner: winner.name, players });
+        this.domino.room.sendAll('round_end', {
+            winner: winner.name,
+            score,
+            players,
+        });
 
         this.timer = setTimeout(() => {
             if (this.domino.game.isGameEnded()) {

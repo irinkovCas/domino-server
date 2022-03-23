@@ -43,6 +43,11 @@ class SocketManager {
             this.clients.set(player, socket);
             this.queuePlayer(player);
 
+            socket.on('error', (er) => {
+                console.log(er);
+            });
+
+
             socket.on('disconnect', () => {
                 this.clients.delete(player);
                 this.waitingToStart.delete(player);
@@ -76,7 +81,7 @@ class SocketManager {
         const config: Config = {
             // Each room must have a unique name
             room: new GameRoom(roomName, this.io, roomClients),
-            gameSettings: { maxScore: 0, timeToPlay: 15_000 },
+            gameSettings: { maxScore: 0, timeToPlay: 30_000 },
             endGameCallback: () => {
                 console.log('end game callback');
             },

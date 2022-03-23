@@ -38,7 +38,11 @@ class GameRoom<
         event: Ev,
         listener: (data: EventParam<ListenEvents, Ev>) => void,
     ): void {
-        this.clients.get(playerName)!.on(String(event), listener);
+        const newListner = (data: any): void => {
+            console.log('listener', data);
+            listener(data);
+        };
+        this.clients.get(playerName)!.on(String(event), newListner);
     }
 
     // public listenToPlayerOnce<Data>(
@@ -68,7 +72,7 @@ class GameRoom<
         event: Ev,
         data: EventParam<SendEvents, Ev>,
     ): void {
-        console.log(`send ${playerName} ${event}`);
+        console.log(`send ${playerName} ${event} ${JSON.stringify(data, null, 4)}`);
         this.clients.get(playerName)!.emit(event, data);
     }
 
@@ -76,7 +80,7 @@ class GameRoom<
         event: Ev,
         data: EventParam<SendEvents, Ev>,
     ): void {
-        console.log(`send all ${event}`);
+        console.log(`send all ${event} ${JSON.stringify(data, null, 4)}`);
         this.io.in(this.name).emit(event, data);
     }
 
@@ -85,7 +89,7 @@ class GameRoom<
         event: Ev,
         data: EventParam<SendEvents, Ev>,
     ): void {
-        console.log(`send all but ${playerName} ${event}`);
+        console.log(`send all but ${playerName} ${event} ${JSON.stringify(data, null, 4)}`);
         this.clients.get(playerName)!.to(this.name).emit(event, data);
     }
 

@@ -8,6 +8,8 @@ import { MoveData, PlayerData, TileData } from './types';
 interface ServerToClientEvent {
     game_start: {
         players: string[];
+        turnTime: number;
+        maxScore: number;
     };
     round_start: {
         dominoSet: number;
@@ -35,6 +37,7 @@ interface ServerToClientEvent {
     };
     round_end: {
         winner: string,
+        score: number,
         players: PlayerData[],
     };
     game_end: { /**/ };
